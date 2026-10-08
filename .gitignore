@@ -1,0 +1,10 @@
+.DS_Store
+Thumbs.db
+.vscode/
+
+# Python
+__pycache__/
+*.pyc
+.env
+venv/
+.venv/

@@ -1,0 +1,896 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>NOC | Supervision Centralisée</title>
+<style>
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  background: #050b11;
+  color: #e9f4f8;
+  font: 14px "Segoe UI", Arial, sans-serif;
+}
+
+button { font: inherit; cursor: pointer; }
+
+.signout {
+  background: #1f0d17 !important;
+  border-color: #ff5364 !important;
+  color: #ffd3db !important;
+}
+
+/* ============ TOP BAR ============ */
+.top {
+  height: 70px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 28px;
+  background: #08131c;
+  border-bottom: 1px solid #18303d;
+  position: sticky;
+  top: 0;
+  z-index: 20;
+}
+.brand { display: flex; gap: 12px; align-items: center; }
+.brand > b {
+  background: #39d5ff;
+  color: #031018;
+  padding: 10px;
+  border-radius: 7px;
+  font-weight: 900;
+}
+.brand strong { display: block; letter-spacing: 1.5px; }
+.brand small { color: #7f98a7; }
+.topright { display: flex; gap: 12px; align-items: center; }
+.live {
+  color: #39d98a;
+  font-weight: 800;
+  text-shadow: 0 0 12px #39d98a;
+  animation: pulse 1.5s infinite;
+}
+@keyframes pulse { 50% { opacity: .4; } }
+
+.top button, nav button {
+  background: #0c1a24;
+  color: #b9cbd4;
+  border: 1px solid #1b3543;
+  border-radius: 7px;
+  padding: 8px 11px;
+}
+.top button:hover, nav button:hover, nav button.active {
+  border-color: #39d5ff;
+  color: #fff;
+  background: #102632;
+}
+
+/* ============ NAV ============ */
+nav {
+  display: flex;
+  gap: 7px;
+  padding: 10px 28px;
+  background: #07111a;
+  border-bottom: 1px solid #18303d;
+  overflow: auto;
+}
+nav button:last-child { margin-left: auto; color: #39d5ff; }
+nav i {
+  font-style: normal;
+  background: #ff5364;
+  color: white;
+  border-radius: 10px;
+  padding: 1px 6px;
+  font-size: 10px;
+}
+
+/* ============ MAIN ============ */
+main { max-width: 1600px; margin: auto; padding: 26px; }
+
+.title {
+  display: flex;
+  justify-content: space-between;
+  align-items: end;
+  margin-bottom: 18px;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+.ey { font-size: 11px; letter-spacing: 2px; color: #39d5ff; }
+.title h1 { margin: 5px 0; font-size: 28px; }
+.muted { color: #8199a8; }
+
+/* ============ GRIDS ============ */
+.grid { display: grid; gap: 15px; }
+.kpis { grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); }
+.two { grid-template-columns: 1.35fr 1fr; }
+.three { grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); }
+
+/* ============ CARDS ============ */
+.card {
+  background: linear-gradient(145deg, #0d1a23, #08131b);
+  border: 1px solid #193543;
+  border-radius: 11px;
+  padding: 17px;
+  box-shadow: 0 18px 45px #0005;
+  transition: transform .2s, border-color .2s;
+}
+.card:hover { transform: translateY(-2px); border-color: #2c6275; }
+
+.kpi .label { color: #829aa8; }
+.value {
+  font-size: 28px;
+  font-weight: 800;
+  margin: 8px 0;
+  text-shadow: 0 0 18px #39d5ff20;
+}
+
+.status {
+  font-size: 10px;
+  padding: 4px 8px;
+  border-radius: 20px;
+  display: inline-block;
+  font-weight: 700;
+}
+.ok { color: #39d98a; background: #39d98a18; }
+.warn { color: #ffc857; background: #ffc85718; }
+.crit { color: #ff5364; background: #ff536418; }
+.info { color: #7ea7ff; background: #7ea7ff18; }
+
+.section {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.section h2 { font-size: 15px; margin: 0; }
+
+/* ============ HEALTH RING ============ */
+.health { display: flex; gap: 25px; align-items: center; flex-wrap: wrap; }
+.ring {
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: conic-gradient(#39d98a 0 98.7%, #18313e 98.7% 100%);
+  position: relative;
+  flex-shrink: 0;
+}
+.ring:after {
+  content: "";
+  position: absolute;
+  width: 87px;
+  height: 87px;
+  border-radius: 50%;
+  background: #0b1720;
+}
+.ring b { position: relative; z-index: 1; font-size: 21px; }
+
+.pillar {
+  display: flex;
+  justify-content: space-between;
+  padding: 11px 0;
+  border-bottom: 1px solid #17303c;
+}
+
+/* ============ ALERTS ============ */
+.alertlist { display: grid; gap: 8px; }
+.alert {
+  display: grid;
+  grid-template-columns: 95px 110px 1fr 65px auto;
+  gap: 10px;
+  align-items: center;
+  padding: 11px;
+  border: 1px solid #193441;
+  border-radius: 8px;
+  background: #09151e;
+}
+@media (max-width: 800px) {
+  .alert { grid-template-columns: 1fr 1fr; }
+}
+.alert button {
+  background: #102632;
+  border: 1px solid #244958;
+  color: #9fd6e7;
+  padding: 5px 8px;
+  border-radius: 5px;
+}
+
+/* ============ CHART ============ */
+.chart { height: 145px; display: flex; align-items: end; gap: 6px; }
+.chart i {
+  flex: 1;
+  background: linear-gradient(#39d5ff, #1a6075);
+  border-radius: 4px 4px 0 0;
+}
+
+/* ============ FILTERS ============ */
+.filter { display: flex; gap: 7px; margin-bottom: 12px; flex-wrap: wrap; }
+.filter button {
+  background: #0b1922;
+  border: 1px solid #1c3542;
+  color: #9cb1bd;
+  border-radius: 6px;
+  padding: 7px;
+}
+
+/* ============ RACKS ============ */
+.rackgrid { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 10px; }
+.rack {
+  height: 160px;
+  background: #081219;
+  border: 1px solid #294552;
+  border-radius: 7px;
+  padding: 9px;
+  position: relative;
+}
+.rack:after {
+  content: "";
+  position: absolute;
+  left: 9px;
+  right: 9px;
+  top: 34px;
+  bottom: 10px;
+  background: repeating-linear-gradient(#17323e 0 8px, #081016 8px 14px);
+  border-radius: 3px;
+}
+.rack em {
+  position: absolute;
+  right: 9px;
+  top: 9px;
+  width: 7px;
+  height: 7px;
+  background: #39d98a;
+  border-radius: 50%;
+  z-index: 1;
+  box-shadow: 0 0 10px #39d98a;
+}
+.rack.bad em { background: #ff5364; box-shadow: 0 0 10px #ff5364; }
+
+/* ============ THREATS ============ */
+.threat { padding: 13px; border-bottom: 1px solid #193441; }
+
+.bar {
+  height: 7px;
+  background: #142833;
+  border-radius: 8px;
+  overflow: hidden;
+  margin-bottom: 15px;
+}
+.bar i { display: block; height: 100%; background: #39d5ff; }
+
+/* ============ MAP ============ */
+.map {
+  height: 350px;
+  position: relative;
+  border: 1px solid #193543;
+  border-radius: 10px;
+  overflow: hidden;
+  background: radial-gradient(circle at 50% 50%, #123445, #061018 62%);
+}
+.node {
+  position: absolute;
+  padding: 13px 17px;
+  background: #0c202b;
+  border: 1px solid #2b6277;
+  border-radius: 8px;
+  text-align: center;
+  box-shadow: 0 0 20px #39d5ff18;
+}
+.node small { display: block; color: #829aa8; }
+.internet { left: 6%; top: 43%; }
+.core { left: 39%; top: 40%; }
+.dc { right: 6%; top: 17%; }
+.vpn { right: 6%; bottom: 17%; }
+.fire { left: 39%; bottom: 8%; }
+
+.line {
+  position: absolute;
+  height: 2px;
+  background: #2b7288;
+  transform-origin: left;
+  box-shadow: 0 0 8px #39d5ff66;
+}
+.ln1 { left: 18%; top: 51%; width: 23%; }
+.ln2 { left: 55%; top: 45%; width: 22%; transform: rotate(-27deg); }
+.ln3 { left: 55%; top: 52%; width: 22%; transform: rotate(26deg); }
+.ln4 { left: 48%; top: 55%; width: 15%; transform: rotate(102deg); }
+
+/* ============ TABLE ============ */
+table { width: 100%; border-collapse: collapse; }
+th, td { text-align: left; padding: 11px; border-bottom: 1px solid #18313d; }
+th { font-size: 10px; color: #8199a8; text-transform: uppercase; }
+
+/* ============ MODAL ============ */
+.modal {
+  position: fixed;
+  inset: 0;
+  background: #0009;
+  display: grid;
+  place-items: center;
+  z-index: 50;
+  padding: 15px;
+}
+.modalbox {
+  width: min(600px, 92vw);
+  background: #0b1821;
+  border: 1px solid #2b596a;
+  border-radius: 12px;
+  padding: 22px;
+}
+.modalbox h2 { margin-top: 0; }
+.modalbox button {
+  background: #102632;
+  border: 1px solid #2b596a;
+  color: white;
+  padding: 9px;
+  border-radius: 6px;
+  margin-right: 7px;
+}
+
+/* ============ TOAST ============ */
+.toast {
+  position: fixed;
+  right: 25px;
+  bottom: 25px;
+  background: #102a36;
+  border: 1px solid #39d5ff;
+  color: #dff8ff;
+  padding: 12px 15px;
+  border-radius: 8px;
+  z-index: 60;
+  animation: slideIn .3s;
+}
+@keyframes slideIn {
+  from { transform: translateX(400px); opacity: 0; }
+  to { transform: translateX(0); opacity: 1; }
+}
+
+/* ============ WALL MODE ============ */
+.wallmode main { max-width: none; padding: 14px; }
+.wallgrid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+.wallgrid .card { min-height: 260px; }
+
+/* ============ ECOSYSTEM ============ */
+.ecosystem {
+  position: relative;
+  height: 500px;
+  border: 1px solid #193543;
+  border-radius: 12px;
+  overflow: hidden;
+  background: radial-gradient(circle at 50% 50%, #123445 0, #08141d 48%, #050b11 100%);
+}
+.ecosystem:before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, transparent 49.8%, #39d5ff10 50%, transparent 50.2%),
+              linear-gradient(0deg, transparent 49.8%, #39d5ff08 50%, transparent 50.2%);
+  background-size: 80px 80px;
+  opacity: .35;
+}
+.eco-node {
+  position: absolute;
+  z-index: 3;
+  min-width: 145px;
+  padding: 14px 16px;
+  text-align: center;
+  background: linear-gradient(145deg, #0e2632, #091720);
+  border: 1px solid #2b6175;
+  border-radius: 10px;
+  box-shadow: 0 0 25px #39d5ff18;
+}
+.eco-node b { display: block; }
+.eco-node small { display: block; color: #7f98a7; margin-top: 5px; }
+.eco-core {
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  min-width: 210px;
+  border-color: #39d5ff;
+  box-shadow: 0 0 35px #39d5ff25;
+}
+.eco-internet { left: 5%; top: 42%; }
+.eco-network { left: 30%; top: 12%; }
+.eco-dc { right: 5%; top: 12%; }
+.eco-cyber { right: 5%; bottom: 12%; }
+.eco-infra { left: 30%; bottom: 12%; }
+
+.eco-lines { position: absolute; inset: 0; z-index: 2; }
+.eco-line {
+  position: absolute;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, #39d5ff, #39d98a, transparent);
+  transform-origin: 0 50%;
+  box-shadow: 0 0 10px #39d5ff66;
+  animation: flow 1.8s linear infinite;
+}
+@keyframes flow {
+  0%, 100% { opacity: .2; filter: brightness(.7); }
+  50% { opacity: 1; filter: brightness(1.5); }
+}
+.eco-l1 { left: 15%; top: 50%; width: 35%; }
+.eco-l2 { left: 39%; top: 25%; width: 18%; transform: rotate(38deg); }
+.eco-l3 { left: 55%; top: 50%; width: 30%; transform: rotate(-32deg); }
+.eco-l4 { left: 55%; top: 55%; width: 30%; transform: rotate(32deg); }
+.eco-l5 { left: 39%; top: 75%; width: 18%; transform: rotate(-38deg); }
+
+.eco-legend {
+  display: flex;
+  gap: 18px;
+  flex-wrap: wrap;
+  margin-top: 12px;
+  color: #9cb1bd;
+  font-size: 12px;
+}
+.eco-legend span:before {
+  content: "";
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #39d98a;
+  margin-right: 6px;
+  box-shadow: 0 0 8px #39d98a;
+}
+
+.scanline {
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: #39d5ff18;
+  animation: scan 5s linear infinite;
+  z-index: 1;
+}
+@keyframes scan { 0% { top: 0; } 100% { top: 100%; } }
+
+/* ============ FOOTER ============ */
+footer {
+  text-align: center;
+  padding: 20px;
+  color: #5a7080;
+  font-size: 12px;
+  border-top: 1px solid #18303d;
+  margin-top: 30px;
+}
+
+/* ============ RESPONSIVE ============ */
+@media (max-width: 950px) {
+  .kpis, .three, .two { grid-template-columns: 1fr 1fr; }
+  .rackgrid { grid-template-columns: repeat(3, 1fr); }
+}
+@media (max-width: 600px) {
+  main { padding: 15px; }
+  .kpis, .three, .two, .rackgrid { grid-template-columns: 1fr; }
+  .top { padding: 0 12px; }
+  .brand strong { font-size: 11px; }
+  .topright span { display: none; }
+  .alert { grid-template-columns: 1fr 1fr; }
+  .wallgrid { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body>
+
+<div id="toast"></div>
+
+<header class="top">
+  <div class="brand">
+    <b>NOC</b>
+    <div>
+      <strong>SUPERVISION CENTRALISÉE</strong>
+      <small>Centre de pilotage opérationnel</small>
+    </div>
+  </div>
+  <div class="topright">
+    <span class="live">● LIVE</span>
+    <span id="clock"></span>
+    <button id="manager">MANAGEMENT</button>
+    <button id="signout" class="signout">SIGN OUT</button>
+    <button id="theme">◐</button>
+  </div>
+</header>
+
+<nav>
+  <button class="active" data-page="dashboard">Vue globale</button>
+  <button data-page="alerts">Alert Center <i id="alertCount">0</i></button>
+  <button data-page="datacenter">Datacenter</button>
+  <button data-page="security">Cyber SOC</button>
+  <button data-page="infra">Infrastructure IT</button>
+  <button data-page="network">Réseau & Télécom</button>
+  <button data-page="ecosystem">ÉCOSYSTÈME</button>
+  <button id="wall">▦ Mural 6 écrans</button>
+</nav>
+
+<main id="app"></main>
+
+<footer>NOC Supervision Pro • Connecté à Zabbix API via Backend</footer>
+
+<script>
+// ============ CONFIG ============
+const API_URL = "http://localhost:8000";
+
+// ============ STATE ============
+const app = document.querySelector("#app");
+const nav = [...document.querySelectorAll("nav button[data-page]")];
+const SIGNED_OUT_KEY = "noc_signed_out";
+let page = "dashboard";
+let manager = false;
+let signedIn = !localStorage.getItem(SIGNED_OUT_KEY);
+let alerts = [];
+let stats = { health: 0, hosts_total: 0, hosts_available: 0, alerts_total: 0, availability: 0 };
+let zabbixConnected = false;
+
+function setSignedOutState(loggedOut) {
+  signedIn = !loggedOut;
+  try {
+    if (loggedOut) localStorage.setItem(SIGNED_OUT_KEY, "1");
+    else localStorage.removeItem(SIGNED_OUT_KEY);
+  } catch (e) {
+    console.warn("Local storage unavailable:", e);
+  }
+}
+
+function signedOutView() {
+  return `
+    <div class="card" style="max-width:480px;margin:60px auto;text-align:center;">
+      <div class="ey">SESSION</div>
+      <h1 style="margin:12px 0">Déconnecté</h1>
+      <p class="muted" style="margin:0 0 18px">Vous avez été déconnecté du tableau de bord NOC.</p>
+      <button id="signin" class="signout" style="padding:10px 18px;">SIGN IN</button>
+    </div>
+  `;
+}
+
+// ============ API FETCH ============
+async function fetchDashboard() {
+  try {
+    console.log("🔄 Fetching data mn backend...");
+    const r = await fetch(`${API_URL}/api/dashboard`);
+    if (!r.ok) throw new Error(`HTTP ${r.status}`);
+    const d = await r.json();
+    stats = d.stats;
+    alerts = d.alerts;
+    console.log("✅ Data fetched:", d);
+    updateConnStatus(true);
+    render();
+  } catch (e) {
+    console.error("❌ Erreur fetch:", e);
+    updateConnStatus(false);
+    alerts = [
+      { id: 1, sev: "CRITIQUE", src: "BACKEND", txt: "Backend mashi connecté — khddem python main.py", time: "—", state: "OPEN" }
+    ];
+    stats = { health: 0, hosts_total: 0, hosts_available: 0, alerts_total: 1, availability: 0 };
+    render();
+  }
+}
+
+function updateConnStatus(connected) {
+  const el = document.querySelector("#connStatus");
+  if (!el) return;
+  if (connected) {
+    el.className = "conn on";
+    el.textContent = "✅ API";
+  } else {
+    el.className = "conn off";
+    el.textContent = "❌ API Off";
+  }
+}
+
+// ============ HELPERS ============
+const K = (l, v, s = "NORMAL", c = "ok") =>
+  `<div class="card kpi"><div class="label">${l}</div><div class="value">${v}</div><span class="status ${c}">${s}</span></div>`;
+
+const H = (e, t, s) =>
+  `<div class="title"><div><div class="ey">${e}</div><h1>${t}</h1><div class="muted">${s}</div></div><span class="status ok">● TEMPS RÉEL</span></div>`;
+
+function alertRows() {
+  if (!alerts.length) return '<div class="muted" style="padding:20px;text-align:center">Aucune alerte active ✅</div>';
+  return alerts.map(a => `
+    <div class="alert">
+      <b class="status ${a.sev == "CRITIQUE" ? "crit" : a.sev == "MAJEUR" ? "warn" : a.sev == "AVERT." ? "warn" : "info"}">${a.sev}</b>
+      <b>${a.src}</b>
+      <span>${a.txt}</span>
+      <small>${a.time}</small>
+      <button onclick="incident(${a.id})">Détails</button>
+    </div>`).join('');
+}
+
+// ============ PAGES ============
+function dashboard() {
+  const health = stats.health || 0;
+  const total = stats.hosts_total || 0;
+  const avail = stats.hosts_available || 0;
+  const openAlerts = alerts.filter(a => a.state === "OPEN").length;
+  const availPct = stats.availability || 0;
+
+  return H("ÉCRAN 01", "Météo du SI", "Santé globale et indicateurs transversaux") +
+  `<div class="grid kpis">
+    ${K("Santé globale", health + " %", health > 95 ? "OPÉRATIONNEL" : "HORS LIGNE", health > 95 ? "ok" : "crit")}
+    ${K("Services critiques", `${avail} / ${total}`, avail < total ? "DÉGRADÉ" : "OK", avail < total ? "warn" : "ok")}
+    ${K("Alertes actives", openAlerts, openAlerts > 0 ? "À TRAITER" : "OK", openAlerts > 0 ? "warn" : "ok")}
+    ${K("Disponibilité réseau", availPct + " %", "STABLE")}
+  </div>
+  <div class="grid two" style="margin-top:15px">
+    <div class="card">
+      <div class="section"><h2>Vue macro — 4 piliers</h2><span class="status ok">24H</span></div>
+      <div class="health">
+        <div class="ring"><b>${health}%</b></div>
+        <div style="flex:1;min-width:200px">
+          <div class="pillar"><span>Infrastructures IT</span><b>99.2%</b></div>
+          <div class="pillar"><span>Datacenter & Physique</span><b>99.8%</b></div>
+          <div class="pillar"><span>Cybersécurité</span><b>98.9%</b></div>
+          <div class="pillar"><span>Réseau & Télécom</span><b>99.6%</b></div>
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="section"><h2>Tendance de santé</h2><span class="status info">12H</span></div>
+      <div class="chart">
+        ${[60,65,62,70,68,77,74,84,81,90,87,98].map(x => `<i style="height:${x}%"></i>`).join('')}
+      </div>
+    </div>
+  </div>
+  <div class="card" style="margin-top:15px">
+    <div class="section"><h2>Fil d'action prioritaire</h2><button onclick="fetchDashboard()">🔄 Rafraîchir</button></div>
+    <div class="alertlist">${alertRows()}</div>
+  </div>`;
+}
+
+function alertsPage() {
+  const critical = alerts.filter(a => a.sev === "CRITIQUE").length;
+  const major = alerts.filter(a => a.sev === "MAJEUR").length;
+  const open = alerts.filter(a => a.state === "OPEN").length;
+  const ack = alerts.filter(a => a.state === "ACK").length;
+
+  return H("ÉCRAN 02", "Alert Center", "Point d'action unique et priorisé") +
+  `<div class="grid kpis">
+    ${K("Critiques", critical, "PRISE EN CHARGE", "crit")}
+    ${K("Majeures", major, "ESCALADE", "warn")}
+    ${K("Ouvertes", open, "À TRAITER", "warn")}
+    ${K("Acquittées", ack, "SUIVI")}
+  </div>
+  <div class="card" style="margin-top:15px">
+    <div class="filter">
+      <button onclick="fetchDashboard()">🔄 Rafraîchir</button>
+      <button>Toutes</button><button>Critiques</button><button>Majeures</button>
+    </div>
+    <div class="alertlist">${alertRows()}</div>
+  </div>`;
+}
+
+function datacenter() {
+  return H("ÉCRAN 03", "Datacenter & Physique", "Énergie, environnement et sécurité physique") +
+  `<div class="grid kpis">
+    ${K("Température","21,8 °C")}${K("Humidité","47 %")}
+    ${K("Onduleurs","2 / 2","REDONDANCE OK")}${K("Accès racks","24 / 24","SÉCURISÉ")}
+  </div>
+  <div class="card" style="margin-top:15px">
+    <div class="section"><h2>Salles IT — vue racks</h2><span class="status ok">DCIM</span></div>
+    <div class="rackgrid">
+      ${Array.from({length:10},(_,i)=>`<div class="rack ${i==6?"bad":""}"><b>R${String(i+1).padStart(2,"0")}</b><em></em></div>`).join('')}
+    </div>
+  </div>`;
+}
+
+function security() {
+  return H("ÉCRAN 04", "Posture Cybersécurité", "Synthèse des incidents, endpoints et vigilance") +
+  `<div class="grid kpis">
+    ${K("Score sécurité","96 / 100","BON NIVEAU")}
+    ${K("Incidents ouverts","03","SURVEILLANCE","warn")}
+    ${K("Endpoints protégés","99,4 %")}
+    ${K("Tentatives bloquées","1 284","24H")}
+  </div>
+  <div class="grid two" style="margin-top:15px">
+    <div class="card">
+      <div class="section"><h2>Événements de sécurité</h2></div>
+      ${["Tentative d'intrusion bloquée","Compte à privilèges surveillé","Certificat SSL proche expiration","Trafic suspect analysé"]
+        .map(x => `<div class="threat"><b>${x}</b><div class="muted">Événement analysé • supervision active</div></div>`).join('')}
+    </div>
+    <div class="card">
+      <div class="section"><h2>Protection</h2></div>
+      ${["Antivirus / EDR","Firewalls","Comptes & certificats","AD / DNS / DHCP"]
+        .map((x,i) => `<p>${x}<b style="float:right">${[99,100,97,99][i]}%</b></p><div class="bar"><i style="width:${[99,100,97,99][i]}%"></i></div>`).join('')}
+    </div>
+  </div>`;
+}
+
+function infra() {
+  const total = stats.hosts_total || 0;
+  const avail = stats.hosts_available || 0;
+  return H("ÉCRAN 05", "Infrastructures IT", "Serveurs, virtualisation, services clés") +
+  `<div class="grid kpis">
+    ${K("Serveurs", `${avail} / ${total}`, avail<total?"DÉGRADÉS":"OK", avail<total?"warn":"ok")}
+    ${K("CPU moyen","61 %")}${K("RAM moyenne","68 %")}
+    ${K("Stockage","74 %","SURVEILLANCE","warn")}
+  </div>
+  <div class="card" style="margin-top:15px">
+    <table>
+      <thead><tr><th>Service</th><th>État</th><th>Charge</th><th>Disponibilité</th></tr></thead>
+      <tbody>
+        ${["Active Directory","DNS / DHCP","Messagerie","Virtualisation","Stockage","Backup"]
+          .map((x,i) => `<tr><td><b>${x}</b></td><td><span class="status ${i==4?"warn":"ok"}">${i==4?"SURVEILLANCE":"OPÉRATIONNEL"}</span></td><td>${42+i*7}%</td><td>99,${i+1}%</td></tr>`).join('')}
+      </tbody>
+    </table>
+  </div>`;
+}
+
+function network() {
+  return H("ÉCRAN 06", "Réseau & Télécom", "Cartographie du cœur réseau, liens WAN et opérateurs") +
+  `<div class="grid kpis">
+    ${K("Disponibilité WAN","99,96 %")}${K("Latence moyenne","18 ms")}
+    ${K("Perte paquets","0,04 %")}${K("Tunnels VPN","24 / 24","ACTIFS")}
+  </div>
+  <div class="card" style="margin-top:15px">
+    <div class="section"><h2>Topologie réseau</h2><span class="status ok">DYNAMIQUE</span></div>
+    <div class="map">
+      <div class="node internet"><b>INTERNET</b><small>WAN</small></div>
+      <div class="node core"><b>CORE NETWORK</b><small>ROUTERS • SWITCHS</small></div>
+      <div class="node dc"><b>DATACENTER</b><small>99,8%</small></div>
+      <div class="node vpn"><b>AGENCES / VPN</b><small>24 TUNNELS</small></div>
+      <div class="node fire"><b>FIREWALL</b><small>EDGE</small></div>
+      <i class="line ln1"></i><i class="line ln2"></i><i class="line ln3"></i><i class="line ln4"></i>
+    </div>
+  </div>`;
+}
+
+function ecosystem() {
+  return H("ÉCOSYSTÈME", "Écosystème IT & Supervision", "Vue transverse — interconnexion des domaines") +
+  `<div class="card">
+    <div class="section"><h2>Cartographie opérationnelle</h2><span class="status ok">● LIVE</span></div>
+    <div class="ecosystem">
+      <div class="scanline"></div>
+      <div class="eco-lines">
+        <i class="eco-line eco-l1"></i><i class="eco-line eco-l2"></i>
+        <i class="eco-line eco-l3"></i><i class="eco-line eco-l4"></i>
+        <i class="eco-line eco-l5"></i>
+      </div>
+      <div class="eco-node eco-internet"><b>INTERNET / WAN</b><small>99,96 % • 18 ms</small></div>
+      <div class="eco-node eco-network"><b>RÉSEAU & TÉLÉCOM</b><small>CORE • VPN • SWITCH</small></div>
+      <div class="eco-node eco-dc"><b>DATACENTER</b><small>21,8 °C • 99,8 %</small></div>
+      <div class="eco-node eco-cyber"><b>CYBER SOC</b><small>96 / 100 • sécurisé</small></div>
+      <div class="eco-node eco-infra"><b>INFRASTRUCTURE IT</b><small>${stats.hosts_available||0} / ${stats.hosts_total||0} serveurs</small></div>
+      <div class="eco-node eco-core">
+        <b>◆ NOC</b><small>SUPERVISION CENTRALISÉE</small>
+        <span class="status ok" style="margin-top:9px">OPÉRATIONNEL</span>
+      </div>
+    </div>
+    <div class="eco-legend">
+      <span>Flux opérationnel</span>
+      <span>Supervision temps réel</span>
+      <span>Source: Backend API ✅</span>
+    </div>
+  </div>
+  <div class="grid three" style="margin-top:15px">
+    ${K("Domaines supervisés","06 / 06","OPÉRATIONNELS")}
+    ${K("Flux actifs","24","TEMPS RÉEL")}
+    ${K("Couverture supervision", (stats.health||0)+" %","GLOBAL")}
+  </div>`;
+}
+
+const views = { dashboard, alerts: alertsPage, datacenter, security, infra, network, ecosystem };
+
+function render() {
+  if (!signedIn) {
+    app.innerHTML = signedOutView();
+    document.querySelector("#signout")?.setAttribute("style", "display:none");
+    return;
+  }
+
+  document.querySelector("#signout")?.removeAttribute("style");
+  app.innerHTML = views[page]();
+  nav.forEach(b => b.classList.toggle("active", b.dataset.page === page));
+  const el = document.querySelector("#alertCount");
+  if (el) el.textContent = alerts.filter(a => a.state === "OPEN").length;
+}
+
+// ============ MODAL ============
+function incident(id) {
+  const a = alerts.find(x => x.id == id);
+  if (!a) return;
+  const m = document.createElement("div");
+  m.className = "modal";
+  m.innerHTML = `<div class="modalbox">
+    <h2>Incident #INC-2026-${String(a.id).padStart(4,"0")}</h2>
+    <p><b>Severity:</b> ${a.sev}</p>
+    <p><b>Source:</b> ${a.src}</p>
+    <p><b>Impact:</b> ${a.txt}</p>
+    <p><b>Status:</b> ${a.state}</p>
+    <button onclick="ack(${a.id}, this)">✅ ACKNOWLEDGE</button>
+    <button onclick="this.closest('.modal').remove()">FERMER</button>
+  </div>`;
+  document.body.appendChild(m);
+}
+
+async function ack(id, btn) {
+  btn.disabled = true;
+  btn.textContent = "⏳...";
+  try {
+    const r = await fetch(`${API_URL}/api/acknowledge`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ event_id: id, message: "ACK from NOC" })
+    });
+    const d = await r.json();
+    if (d.success) {
+      toast("✅ Incident acquitté");
+      btn.closest(".modal").remove();
+      fetchDashboard();
+    }
+  } catch (e) {
+    toast("❌ Erreur API");
+    btn.disabled = false;
+    btn.textContent = "✅ ACKNOWLEDGE";
+  }
+}
+
+function toast(t) {
+  const x = document.createElement("div");
+  x.className = "toast";
+  x.textContent = t;
+  document.body.appendChild(x);
+  setTimeout(() => x.remove(), 2600);
+}
+
+// ============ NAV ============
+nav.forEach(b => b.onclick = () => { page = b.dataset.page; render(); });
+
+document.querySelector("#wall").onclick = () => {
+  document.body.classList.toggle("wallmode");
+  page = "dashboard";
+  render();
+  if (document.body.classList.contains("wallmode")) {
+    const titles = ["Météo du SI","Alertes","Datacenter","Cybersécurité","Infra IT","Réseau"];
+    const vals = [stats.health + "%", alerts.filter(a=>a.state=="OPEN").length + " ALERTES", "21.8 °C", "96/100", (stats.hosts_available||0) + " SRV", "99.96%"];
+    app.innerHTML = `<div class="title"><div><div class="ey">MODE MURAL</div><h1>Centre de supervision — 6 écrans</h1></div></div>
+    <div class="wallgrid">
+      ${titles.map((x,i)=>`<div class="card"><div class="section"><h2>ÉCRAN ${i+1} • ${x}</h2><span class="status ok">LIVE</span></div><div class="value">${vals[i]}</div><div class="muted">API Backend</div></div>`).join('')}
+    </div>`;
+  }
+};
+
+document.querySelector("#manager").onclick = () => {
+  manager = !manager;
+  toast(manager ? "Mode management activé" : "Mode opérateur activé");
+  render();
+};
+
+document.querySelector("#signout").onclick = () => {
+  if (!signedIn) return;
+  const confirmed = window.confirm("Voulez-vous vraiment vous déconnecter du tableau de bord ?");
+  if (!confirmed) return;
+  setSignedOutState(true);
+  toast("✅ Déconnecté");
+  render();
+};
+
+document.addEventListener("click", (event) => {
+  if (event.target && event.target.id === "signin") {
+    setSignedOutState(false);
+    toast("✅ Connecté");
+    render();
+  }
+});
+
+document.querySelector("#theme").onclick = () =>
+  document.body.style.filter = document.body.style.filter ? "" : "brightness(1.15)";
+
+setInterval(() => {
+  const c = document.querySelector("#clock");
+  if (c) c.textContent = new Date().toLocaleTimeString("fr-FR");
+}, 1000);
+
+// ============ AUTO-REFRESH ============
+setInterval(fetchDashboard, 15000);
+
+// ============ LAUNCH ============
+fetchDashboard();
+</script>
+
+</body>
+</html>
