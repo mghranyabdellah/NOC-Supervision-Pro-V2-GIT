@@ -4,6 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>NOC | Supervision Centralisée</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <style>
 * { box-sizing: border-box; }
 
@@ -12,7 +13,26 @@ body {
   background: #050b11;
   color: #e9f4f8;
   font: 14px "Segoe UI", Arial, sans-serif;
+  transition: background .3s, color .3s;
 }
+
+body.light {
+  background: #f0f4f8;
+  color: #1a2332;
+}
+body.light .top,
+body.light nav,
+body.light .card,
+body.light .modalbox {
+  background: #fff;
+  color: #1a2332;
+  border-color: #d0dce6;
+}
+body.light .card { background: linear-gradient(145deg, #fff, #f5f9fc); }
+body.light .alert { background: #f8fafc; border-color: #e0e8f0; }
+body.light .muted { color: #6b7a8a; }
+body.light .status.ok { background: #39d98a22; }
+body.light .live { color: #059669; }
 
 button { font: inherit; cursor: pointer; }
 
@@ -50,10 +70,7 @@ button { font: inherit; cursor: pointer; }
   z-index: 1;
 }
 
-.loginbox .logo {
-  text-align: center;
-  margin-bottom: 8px;
-}
+.loginbox .logo { text-align: center; margin-bottom: 8px; }
 .loginbox .logo b {
   display: inline-block;
   background: #39d5ff;
@@ -64,13 +81,11 @@ button { font: inherit; cursor: pointer; }
   font-size: 22px;
   letter-spacing: 1px;
 }
-
 .loginbox h1 {
   text-align: center;
   font-size: 20px;
   letter-spacing: 2px;
   margin: 12px 0 4px;
-  color: #e9f4f8;
 }
 .loginbox .sub {
   text-align: center;
@@ -79,7 +94,6 @@ button { font: inherit; cursor: pointer; }
   margin-bottom: 28px;
   letter-spacing: 1px;
 }
-
 .loginbox label {
   display: block;
   font-size: 11px;
@@ -88,7 +102,6 @@ button { font: inherit; cursor: pointer; }
   margin-bottom: 6px;
   text-transform: uppercase;
 }
-
 .loginbox input {
   width: 100%;
   background: #09151e;
@@ -106,10 +119,6 @@ button { font: inherit; cursor: pointer; }
   border-color: #39d5ff;
   box-shadow: 0 0 0 3px #39d5ff22;
 }
-.loginbox input::placeholder {
-  color: #4a6371;
-}
-
 .loginbox button {
   width: 100%;
   background: linear-gradient(135deg, #39d5ff, #2aa8d0);
@@ -124,16 +133,8 @@ button { font: inherit; cursor: pointer; }
   transition: transform .15s, box-shadow .2s;
   margin-top: 6px;
 }
-.loginbox button:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 10px 25px #39d5ff44;
-}
-.loginbox button:disabled {
-  opacity: .6;
-  cursor: not-allowed;
-  transform: none;
-}
-
+.loginbox button:hover { transform: translateY(-1px); box-shadow: 0 10px 25px #39d5ff44; }
+.loginbox button:disabled { opacity: .6; cursor: not-allowed; transform: none; }
 .loginbox .error {
   background: #ff536418;
   border: 1px solid #ff5364;
@@ -145,7 +146,6 @@ button { font: inherit; cursor: pointer; }
   display: none;
 }
 .loginbox .error.show { display: block; }
-
 .loginbox .demo {
   text-align: center;
   color: #5a7080;
@@ -187,7 +187,7 @@ button { font: inherit; cursor: pointer; }
 }
 .brand strong { display: block; letter-spacing: 1.5px; }
 .brand small { color: #7f98a7; }
-.topright { display: flex; gap: 12px; align-items: center; }
+.topright { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
 .live {
   color: #39d98a;
   font-weight: 800;
@@ -195,6 +195,15 @@ button { font: inherit; cursor: pointer; }
   animation: pulse 1.5s infinite;
 }
 @keyframes pulse { 50% { opacity: .4; } }
+
+.last-update {
+  font-size: 11px;
+  color: #7f98a7;
+  background: #102632;
+  padding: 5px 10px;
+  border-radius: 5px;
+  border: 1px solid #1b3543;
+}
 
 .top button, nav button {
   background: #0c1a24;
@@ -385,21 +394,60 @@ main { max-width: 1600px; margin: auto; padding: 26px; }
 }
 
 /* ============ CHART ============ */
-.chart { height: 145px; display: flex; align-items: end; gap: 6px; }
-.chart i {
-  flex: 1;
-  background: linear-gradient(#39d5ff, #1a6075);
-  border-radius: 4px 4px 0 0;
+.chart-container {
+  position: relative;
+  height: 250px;
+  width: 100%;
 }
 
 /* ============ FILTERS ============ */
-.filter { display: flex; gap: 7px; margin-bottom: 12px; flex-wrap: wrap; }
+.filter {
+  display: flex;
+  gap: 7px;
+  margin-bottom: 12px;
+  flex-wrap: wrap;
+  align-items: center;
+}
 .filter button {
   background: #0b1922;
   border: 1px solid #1c3542;
   color: #9cb1bd;
   border-radius: 6px;
-  padding: 7px;
+  padding: 7px 12px;
+  font-size: 12px;
+  transition: all .15s;
+}
+.filter button:hover {
+  border-color: #39d5ff;
+  color: #39d5ff;
+}
+.filter button.active {
+  background: #39d5ff;
+  color: #031018;
+  border-color: #39d5ff;
+  font-weight: 700;
+}
+.filter input {
+  background: #0b1922;
+  border: 1px solid #1c3542;
+  color: #e9f4f8;
+  border-radius: 6px;
+  padding: 7px 12px;
+  font: inherit;
+  font-size: 12px;
+  min-width: 200px;
+  flex: 1;
+  outline: none;
+}
+.filter input:focus { border-color: #39d5ff; }
+.filter .btn-export {
+  background: #1a4d2e;
+  border-color: #39d98a;
+  color: #a3f5c8;
+}
+.filter .btn-export:hover {
+  background: #39d98a;
+  color: #031018;
 }
 
 /* ============ RACKS ============ */
@@ -437,7 +485,6 @@ main { max-width: 1600px; margin: auto; padding: 26px; }
 
 /* ============ THREATS ============ */
 .threat { padding: 13px; border-bottom: 1px solid #193441; }
-
 .bar {
   height: 7px;
   background: #142833;
@@ -548,15 +595,6 @@ th { font-size: 10px; color: #8199a8; text-transform: uppercase; }
   overflow: hidden;
   background: radial-gradient(circle at 50% 50%, #123445 0, #08141d 48%, #050b11 100%);
 }
-.ecosystem:before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(90deg, transparent 49.8%, #39d5ff10 50%, transparent 50.2%),
-              linear-gradient(0deg, transparent 49.8%, #39d5ff08 50%, transparent 50.2%);
-  background-size: 80px 80px;
-  opacity: .35;
-}
 .eco-node {
   position: absolute;
   z-index: 3;
@@ -566,7 +604,6 @@ th { font-size: 10px; color: #8199a8; text-transform: uppercase; }
   background: linear-gradient(145deg, #0e2632, #091720);
   border: 1px solid #2b6175;
   border-radius: 10px;
-  box-shadow: 0 0 25px #39d5ff18;
 }
 .eco-node b { display: block; }
 .eco-node small { display: block; color: #7f98a7; margin-top: 5px; }
@@ -576,14 +613,12 @@ th { font-size: 10px; color: #8199a8; text-transform: uppercase; }
   transform: translate(-50%, -50%);
   min-width: 210px;
   border-color: #39d5ff;
-  box-shadow: 0 0 35px #39d5ff25;
 }
 .eco-internet { left: 5%; top: 42%; }
 .eco-network { left: 30%; top: 12%; }
 .eco-dc { right: 5%; top: 12%; }
 .eco-cyber { right: 5%; bottom: 12%; }
 .eco-infra { left: 30%; bottom: 12%; }
-
 .eco-lines { position: absolute; inset: 0; z-index: 2; }
 .eco-line {
   position: absolute;
@@ -622,17 +657,6 @@ th { font-size: 10px; color: #8199a8; text-transform: uppercase; }
   box-shadow: 0 0 8px #39d98a;
 }
 
-.scanline {
-  position: absolute;
-  left: 0;
-  right: 0;
-  height: 1px;
-  background: #39d5ff18;
-  animation: scan 5s linear infinite;
-  z-index: 1;
-}
-@keyframes scan { 0% { top: 0; } 100% { top: 100%; } }
-
 /* ============ FOOTER ============ */
 footer {
   text-align: center;
@@ -661,25 +685,20 @@ footer {
 </head>
 <body>
 
-<!-- ============ LOGIN PAGE ============ -->
+<!-- LOGIN PAGE -->
 <div id="loginPage">
   <div class="loginbox">
     <div class="logo"><b>NOC</b></div>
     <h1>SUPERVISION</h1>
     <div class="sub">CENTRE DE PILOTAGE OPÉRATIONNEL</div>
-
     <div class="error" id="loginError"></div>
-
     <form id="loginForm" autocomplete="on">
       <label for="username">Nom d'utilisateur</label>
       <input type="text" id="username" name="username" placeholder="admin" autocomplete="username" required>
-
       <label for="password">Mot de passe</label>
       <input type="password" id="password" name="password" placeholder="••••••••" autocomplete="current-password" required>
-
       <button type="submit" id="loginBtn">SE CONNECTER</button>
     </form>
-
     <div class="demo">
       <b>Comptes de démonstration :</b><br>
       <code>admin</code> / <code>admin123</code> — Administrateur<br>
@@ -689,7 +708,7 @@ footer {
   </div>
 </div>
 
-<!-- ============ MAIN APP ============ -->
+<!-- MAIN APP -->
 <div id="toast"></div>
 
 <header class="top">
@@ -703,6 +722,7 @@ footer {
   <div class="topright">
     <span class="live">● LIVE</span>
     <span id="clock"></span>
+    <span class="last-update" id="lastUpdate">MAJ: —</span>
     <div class="user-badge" id="userBadge" style="display:none">
       <div class="avatar" id="userAvatar">?</div>
       <div>
@@ -712,7 +732,7 @@ footer {
     </div>
     <button id="manager">MANAGEMENT</button>
     <button class="btn-signout" id="signOutBtn" style="display:none">SIGN OUT</button>
-    <button id="theme">◐</button>
+    <button id="theme">🌗</button>
   </div>
 </header>
 
@@ -746,6 +766,10 @@ let alerts = [];
 let stats = { health: 0, hosts_total: 0, hosts_available: 0, alerts_total: 0, availability: 0 };
 let currentUser = null;
 let authToken = null;
+let alertFilter = "all"; // all | CRITIQUE | MAJEUR | AVERT. | INFO | OPEN
+let alertSearch = "";
+let chartInstance = null;
+let lastUpdateTime = null;
 
 // ============ AUTH ============
 function saveSession(token, user) {
@@ -754,7 +778,7 @@ function saveSession(token, user) {
   try {
     localStorage.setItem(TOKEN_KEY, token);
     localStorage.setItem(USER_KEY, JSON.stringify(user));
-  } catch(e) { console.warn("localStorage mashi khddam:", e); }
+  } catch(e) {}
 }
 
 function clearSession() {
@@ -802,7 +826,6 @@ async function doLogin(username, password) {
   err.classList.remove("show");
   btn.disabled = true;
   btn.textContent = "CONNEXION...";
-
   try {
     const r = await fetch(`${API_URL}/api/login`, {
       method: "POST",
@@ -810,11 +833,7 @@ async function doLogin(username, password) {
       body: JSON.stringify({ username, password })
     });
     const d = await r.json();
-
-    if (!r.ok || !d.success) {
-      throw new Error(d.detail || "Identifiants incorrects");
-    }
-
+    if (!r.ok || !d.success) throw new Error(d.detail || "Identifiants incorrects");
     saveSession(d.token, d.user);
     hideLogin();
     toast("✅ Bienvenue " + (d.user.name || d.user.username));
@@ -853,12 +872,33 @@ async function fetchDashboard() {
     const d = await r.json();
     stats = d.stats;
     alerts = d.alerts;
+    lastUpdateTime = new Date();
+    updateLastUpdate();
     render();
+    // Notif browser ila kayn alerte CRITIQUE jdida
+    checkCriticalAlert();
   } catch (e) {
     console.error("Erreur fetch:", e);
     alerts = [{ id: 1, sev: "CRITIQUE", src: "BACKEND", txt: "Backend mashi connecté", time: "—", state: "OPEN" }];
     stats = { health: 0, hosts_total: 0, hosts_available: 0, alerts_total: 1, availability: 0 };
     render();
+  }
+}
+
+function updateLastUpdate() {
+  const el = document.querySelector("#lastUpdate");
+  if (el && lastUpdateTime) {
+    el.textContent = "MAJ: " + lastUpdateTime.toLocaleTimeString("fr-FR");
+  }
+}
+
+function checkCriticalAlert() {
+  const critical = alerts.filter(a => a.sev === "CRITIQUE" && a.state === "OPEN");
+  if (critical.length > 0 && "Notification" in window && Notification.permission === "granted") {
+    new Notification("⚠️ Alerte CRITIQUE", {
+      body: `${critical[0].src}: ${critical[0].txt}`,
+      icon: "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⚠️</text></svg>"
+    });
   }
 }
 
@@ -869,9 +909,28 @@ const K = (l, v, s = "NORMAL", c = "ok") =>
 const H = (e, t, s) =>
   `<div class="title"><div><div class="ey">${e}</div><h1>${t}</h1><div class="muted">${s}</div></div><span class="status ok">● TEMPS RÉEL</span></div>`;
 
+function getFilteredAlerts() {
+  let filtered = [...alerts];
+  if (alertFilter === "OPEN") {
+    filtered = filtered.filter(a => a.state === "OPEN");
+  } else if (alertFilter !== "all") {
+    filtered = filtered.filter(a => a.sev === alertFilter);
+  }
+  if (alertSearch) {
+    const q = alertSearch.toLowerCase();
+    filtered = filtered.filter(a =>
+      (a.src || "").toLowerCase().includes(q) ||
+      (a.txt || "").toLowerCase().includes(q) ||
+      (a.sev || "").toLowerCase().includes(q)
+    );
+  }
+  return filtered;
+}
+
 function alertRows() {
-  if (!alerts.length) return '<div class="muted" style="padding:20px;text-align:center">Aucune alerte active ✅</div>';
-  return alerts.map(a => `
+  const filtered = getFilteredAlerts();
+  if (!filtered.length) return '<div class="muted" style="padding:20px;text-align:center">Aucune alerte ✅</div>';
+  return filtered.map(a => `
     <div class="alert">
       <b class="status ${a.sev == "CRITIQUE" ? "crit" : a.sev == "MAJEUR" ? "warn" : a.sev == "AVERT." ? "warn" : "info"}">${a.sev}</b>
       <b>${a.src}</b>
@@ -881,6 +940,82 @@ function alertRows() {
     </div>`).join('');
 }
 
+// ============ EXPORT CSV ============
+function exportCSV() {
+  const filtered = getFilteredAlerts();
+  if (!filtered.length) { toast("⚠️ Pas d'alertes à exporter"); return; }
+  const rows = [
+    ["ID", "Severity", "Source", "Description", "Time", "State"],
+    ...filtered.map(a => [a.id, a.sev, a.src, a.txt, a.time, a.state])
+  ];
+  const csv = rows.map(r => r.map(c => `"${String(c).replace(/"/g, '""')}"`).join(",")).join("\n");
+  const blob = new Blob(["\ufeff" + csv], { type: "text/csv;charset=utf-8" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = `noc-alertes-${new Date().toISOString().slice(0,10)}.csv`;
+  a.click();
+  URL.revokeObjectURL(url);
+  toast("✅ Export CSV téléchargé");
+}
+
+// ============ CHARTS ============
+function renderHealthChart() {
+  const ctx = document.getElementById("healthChart");
+  if (!ctx) return;
+  if (chartInstance) chartInstance.destroy();
+  const labels = Array.from({length: 12}, (_, i) => `-${11-i}h`);
+  const data = [60,65,62,70,68,77,74,84,81,90,87, Math.round(stats.health || 98)];
+  chartInstance = new Chart(ctx, {
+    type: "line",
+    data: {
+      labels,
+      datasets: [{
+        label: "Santé (%)",
+        data,
+        borderColor: "#39d5ff",
+        backgroundColor: "rgba(57, 213, 255, 0.1)",
+        borderWidth: 2,
+        fill: true,
+        tension: 0.4,
+        pointBackgroundColor: "#39d5ff",
+        pointBorderColor: "#031018",
+        pointBorderWidth: 2,
+        pointRadius: 4,
+        pointHoverRadius: 6
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          backgroundColor: "#0b1821",
+          borderColor: "#39d5ff",
+          borderWidth: 1,
+          titleColor: "#e9f4f8",
+          bodyColor: "#e9f4f8",
+          padding: 10
+        }
+      },
+      scales: {
+        y: {
+          beginAtZero: false,
+          min: 50,
+          max: 100,
+          grid: { color: "#193543" },
+          ticks: { color: "#8199a8" }
+        },
+        x: {
+          grid: { color: "#193543" },
+          ticks: { color: "#8199a8" }
+        }
+      }
+    }
+  });
+}
+
 // ============ PAGES ============
 function dashboard() {
   const health = stats.health || 0;
@@ -888,6 +1023,8 @@ function dashboard() {
   const avail = stats.hosts_available || 0;
   const openAlerts = alerts.filter(a => a.state === "OPEN").length;
   const availPct = stats.availability || 0;
+
+  setTimeout(renderHealthChart, 50);
 
   return H("ÉCRAN 01", "Météo du SI", "Santé globale et indicateurs transversaux") +
   `<div class="grid kpis">
@@ -911,9 +1048,7 @@ function dashboard() {
     </div>
     <div class="card">
       <div class="section"><h2>Tendance de santé</h2><span class="status info">12H</span></div>
-      <div class="chart">
-        ${[60,65,62,70,68,77,74,84,81,90,87,98].map(x => `<i style="height:${x}%"></i>`).join('')}
-      </div>
+      <div class="chart-container"><canvas id="healthChart"></canvas></div>
     </div>
   </div>
   <div class="card" style="margin-top:15px">
@@ -937,12 +1072,22 @@ function alertsPage() {
   </div>
   <div class="card" style="margin-top:15px">
     <div class="filter">
+      <button class="${alertFilter === 'all' ? 'active' : ''}" onclick="setFilter('all')">Toutes</button>
+      <button class="${alertFilter === 'CRITIQUE' ? 'active' : ''}" onclick="setFilter('CRITIQUE')">🔴 Critiques</button>
+      <button class="${alertFilter === 'MAJEUR' ? 'active' : ''}" onclick="setFilter('MAJEUR')">🟡 Majeures</button>
+      <button class="${alertFilter === 'AVERT.' ? 'active' : ''}" onclick="setFilter('AVERT.')">🟠 Avertissements</button>
+      <button class="${alertFilter === 'INFO' ? 'active' : ''}" onclick="setFilter('INFO')">🔵 Info</button>
+      <button class="${alertFilter === 'OPEN' ? 'active' : ''}" onclick="setFilter('OPEN')">Ouvertes</button>
+      <input type="text" placeholder="🔍 Rechercher (source, texte...)" value="${alertSearch}" oninput="setSearch(this.value)">
+      <button class="btn-export" onclick="exportCSV()">📥 Export CSV</button>
       <button onclick="fetchDashboard()">🔄 Rafraîchir</button>
-      <button>Toutes</button><button>Critiques</button><button>Majeures</button>
     </div>
     <div class="alertlist">${alertRows()}</div>
   </div>`;
 }
+
+function setFilter(f) { alertFilter = f; render(); }
+function setSearch(s) { alertSearch = s; render(); }
 
 function datacenter() {
   return H("ÉCRAN 03", "Datacenter & Physique", "Énergie, environnement et sécurité physique") +
@@ -1024,7 +1169,6 @@ function ecosystem() {
   `<div class="card">
     <div class="section"><h2>Cartographie opérationnelle</h2><span class="status ok">● LIVE</span></div>
     <div class="ecosystem">
-      <div class="scanline"></div>
       <div class="eco-lines">
         <i class="eco-line eco-l1"></i><i class="eco-line eco-l2"></i>
         <i class="eco-line eco-l3"></i><i class="eco-line eco-l4"></i>
@@ -1133,13 +1277,13 @@ document.querySelector("#manager").onclick = () => {
   render();
 };
 
-document.querySelector("#theme").onclick = () =>
-  document.body.style.filter = document.body.style.filter ? "" : "brightness(1.15)";
+document.querySelector("#theme").onclick = () => {
+  document.body.classList.toggle("light");
+  toast(document.body.classList.contains("light") ? "☀️ Thème clair" : "🌙 Thème sombre");
+};
 
 document.querySelector("#signOutBtn").onclick = () => {
-  if (confirm("Voulez-vous vraiment vous déconnecter ?")) {
-    doLogout();
-  }
+  if (confirm("Voulez-vous vraiment vous déconnecter ?")) doLogout();
 };
 
 setInterval(() => {
@@ -1150,6 +1294,13 @@ setInterval(() => {
 setInterval(() => {
   if (authToken) fetchDashboard();
 }, 15000);
+
+// ============ NOTIFICATIONS ============
+if ("Notification" in window && Notification.permission === "default") {
+  setTimeout(() => {
+    Notification.requestPermission();
+  }, 5000);
+}
 
 // ============ LOGIN FORM ============
 document.querySelector("#loginForm").onsubmit = (e) => {
