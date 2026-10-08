@@ -16,10 +16,152 @@ body {
 
 button { font: inherit; cursor: pointer; }
 
-.signout {
-  background: #1f0d17 !important;
-  border-color: #ff5364 !important;
-  color: #ffd3db !important;
+/* ============ LOGIN PAGE ============ */
+#loginPage {
+  position: fixed;
+  inset: 0;
+  background: radial-gradient(circle at 50% 50%, #123445 0, #08141d 48%, #050b11 100%);
+  display: grid;
+  place-items: center;
+  z-index: 9999;
+  padding: 20px;
+}
+#loginPage.hidden { display: none; }
+
+#loginPage::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, transparent 49.8%, #39d5ff10 50%, transparent 50.2%),
+              linear-gradient(0deg, transparent 49.8%, #39d5ff08 50%, transparent 50.2%);
+  background-size: 80px 80px;
+  opacity: .35;
+  pointer-events: none;
+}
+
+.loginbox {
+  width: min(420px, 95vw);
+  background: linear-gradient(145deg, #0d1a23, #08131b);
+  border: 1px solid #193543;
+  border-radius: 16px;
+  padding: 38px 32px;
+  box-shadow: 0 25px 70px #0009;
+  position: relative;
+  z-index: 1;
+}
+
+.loginbox .logo {
+  text-align: center;
+  margin-bottom: 8px;
+}
+.loginbox .logo b {
+  display: inline-block;
+  background: #39d5ff;
+  color: #031018;
+  padding: 12px 16px;
+  border-radius: 9px;
+  font-weight: 900;
+  font-size: 22px;
+  letter-spacing: 1px;
+}
+
+.loginbox h1 {
+  text-align: center;
+  font-size: 20px;
+  letter-spacing: 2px;
+  margin: 12px 0 4px;
+  color: #e9f4f8;
+}
+.loginbox .sub {
+  text-align: center;
+  color: #7f98a7;
+  font-size: 12px;
+  margin-bottom: 28px;
+  letter-spacing: 1px;
+}
+
+.loginbox label {
+  display: block;
+  font-size: 11px;
+  color: #8199a8;
+  letter-spacing: 1.5px;
+  margin-bottom: 6px;
+  text-transform: uppercase;
+}
+
+.loginbox input {
+  width: 100%;
+  background: #09151e;
+  border: 1px solid #193441;
+  color: #e9f4f8;
+  padding: 13px 14px;
+  border-radius: 8px;
+  font: inherit;
+  font-size: 14px;
+  margin-bottom: 18px;
+  transition: border-color .2s, box-shadow .2s;
+  outline: none;
+}
+.loginbox input:focus {
+  border-color: #39d5ff;
+  box-shadow: 0 0 0 3px #39d5ff22;
+}
+.loginbox input::placeholder {
+  color: #4a6371;
+}
+
+.loginbox button {
+  width: 100%;
+  background: linear-gradient(135deg, #39d5ff, #2aa8d0);
+  color: #031018;
+  border: none;
+  padding: 14px;
+  border-radius: 8px;
+  font-weight: 800;
+  font-size: 13px;
+  letter-spacing: 2px;
+  cursor: pointer;
+  transition: transform .15s, box-shadow .2s;
+  margin-top: 6px;
+}
+.loginbox button:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 10px 25px #39d5ff44;
+}
+.loginbox button:disabled {
+  opacity: .6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.loginbox .error {
+  background: #ff536418;
+  border: 1px solid #ff5364;
+  color: #ff8899;
+  padding: 10px 12px;
+  border-radius: 7px;
+  font-size: 12px;
+  margin-bottom: 16px;
+  display: none;
+}
+.loginbox .error.show { display: block; }
+
+.loginbox .demo {
+  text-align: center;
+  color: #5a7080;
+  font-size: 11px;
+  margin-top: 22px;
+  padding-top: 18px;
+  border-top: 1px solid #17303c;
+  line-height: 1.8;
+}
+.loginbox .demo code {
+  background: #102632;
+  color: #9fd6e7;
+  padding: 2px 7px;
+  border-radius: 4px;
+  font-family: monospace;
+  font-size: 11px;
 }
 
 /* ============ TOP BAR ============ */
@@ -65,6 +207,48 @@ button { font: inherit; cursor: pointer; }
   border-color: #39d5ff;
   color: #fff;
   background: #102632;
+}
+
+.user-badge {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: #102632;
+  border: 1px solid #1b3543;
+  border-radius: 20px;
+  padding: 5px 12px 5px 6px;
+  font-size: 12px;
+}
+.user-badge .avatar {
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #39d5ff, #2aa8d0);
+  display: grid;
+  place-items: center;
+  color: #031018;
+  font-weight: 900;
+  font-size: 11px;
+}
+.user-badge .name { color: #9fd6e7; }
+.user-badge .role {
+  color: #7f98a7;
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.btn-signout {
+  background: #3a1a20 !important;
+  border: 1px solid #ff5364 !important;
+  color: #ff8899 !important;
+  font-size: 11px;
+  letter-spacing: 1px;
+  padding: 7px 12px !important;
+}
+.btn-signout:hover {
+  background: #ff5364 !important;
+  color: white !important;
 }
 
 /* ============ NAV ============ */
@@ -477,6 +661,35 @@ footer {
 </head>
 <body>
 
+<!-- ============ LOGIN PAGE ============ -->
+<div id="loginPage">
+  <div class="loginbox">
+    <div class="logo"><b>NOC</b></div>
+    <h1>SUPERVISION</h1>
+    <div class="sub">CENTRE DE PILOTAGE OPÉRATIONNEL</div>
+
+    <div class="error" id="loginError"></div>
+
+    <form id="loginForm" autocomplete="on">
+      <label for="username">Nom d'utilisateur</label>
+      <input type="text" id="username" name="username" placeholder="admin" autocomplete="username" required>
+
+      <label for="password">Mot de passe</label>
+      <input type="password" id="password" name="password" placeholder="••••••••" autocomplete="current-password" required>
+
+      <button type="submit" id="loginBtn">SE CONNECTER</button>
+    </form>
+
+    <div class="demo">
+      <b>Comptes de démonstration :</b><br>
+      <code>admin</code> / <code>admin123</code> — Administrateur<br>
+      <code>operator</code> / <code>operator123</code> — Opérateur<br>
+      <code>viewer</code> / <code>viewer123</code> — Consultation
+    </div>
+  </div>
+</div>
+
+<!-- ============ MAIN APP ============ -->
 <div id="toast"></div>
 
 <header class="top">
@@ -490,8 +703,15 @@ footer {
   <div class="topright">
     <span class="live">● LIVE</span>
     <span id="clock"></span>
+    <div class="user-badge" id="userBadge" style="display:none">
+      <div class="avatar" id="userAvatar">?</div>
+      <div>
+        <div class="name" id="userName">—</div>
+        <div class="role" id="userRole">—</div>
+      </div>
+    </div>
     <button id="manager">MANAGEMENT</button>
-    <button id="signout" class="signout">SIGN OUT</button>
+    <button class="btn-signout" id="signOutBtn" style="display:none">SIGN OUT</button>
     <button id="theme">◐</button>
   </div>
 </header>
@@ -514,71 +734,131 @@ footer {
 <script>
 // ============ CONFIG ============
 const API_URL = "http://localhost:8000";
+const TOKEN_KEY = "noc_token";
+const USER_KEY = "noc_user";
 
 // ============ STATE ============
 const app = document.querySelector("#app");
 const nav = [...document.querySelectorAll("nav button[data-page]")];
-const SIGNED_OUT_KEY = "noc_signed_out";
 let page = "dashboard";
 let manager = false;
-let signedIn = !localStorage.getItem(SIGNED_OUT_KEY);
 let alerts = [];
 let stats = { health: 0, hosts_total: 0, hosts_available: 0, alerts_total: 0, availability: 0 };
-let zabbixConnected = false;
+let currentUser = null;
+let authToken = null;
 
-function setSignedOutState(loggedOut) {
-  signedIn = !loggedOut;
+// ============ AUTH ============
+function saveSession(token, user) {
+  authToken = token;
+  currentUser = user;
   try {
-    if (loggedOut) localStorage.setItem(SIGNED_OUT_KEY, "1");
-    else localStorage.removeItem(SIGNED_OUT_KEY);
+    localStorage.setItem(TOKEN_KEY, token);
+    localStorage.setItem(USER_KEY, JSON.stringify(user));
+  } catch(e) { console.warn("localStorage mashi khddam:", e); }
+}
+
+function clearSession() {
+  authToken = null;
+  currentUser = null;
+  try {
+    localStorage.removeItem(TOKEN_KEY);
+    localStorage.removeItem(USER_KEY);
+  } catch(e) {}
+}
+
+function loadSession() {
+  try {
+    const t = localStorage.getItem(TOKEN_KEY);
+    const u = localStorage.getItem(USER_KEY);
+    if (t && u) {
+      authToken = t;
+      currentUser = JSON.parse(u);
+      return true;
+    }
+  } catch(e) {}
+  return false;
+}
+
+function showLogin() {
+  document.querySelector("#loginPage").classList.remove("hidden");
+  document.querySelector("#userBadge").style.display = "none";
+  document.querySelector("#signOutBtn").style.display = "none";
+}
+
+function hideLogin() {
+  document.querySelector("#loginPage").classList.add("hidden");
+  if (currentUser) {
+    document.querySelector("#userBadge").style.display = "flex";
+    document.querySelector("#userName").textContent = currentUser.name || currentUser.username;
+    document.querySelector("#userRole").textContent = currentUser.role || "user";
+    document.querySelector("#userAvatar").textContent = (currentUser.name || currentUser.username || "?").charAt(0).toUpperCase();
+  }
+  document.querySelector("#signOutBtn").style.display = "inline-block";
+}
+
+async function doLogin(username, password) {
+  const btn = document.querySelector("#loginBtn");
+  const err = document.querySelector("#loginError");
+  err.classList.remove("show");
+  btn.disabled = true;
+  btn.textContent = "CONNEXION...";
+
+  try {
+    const r = await fetch(`${API_URL}/api/login`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ username, password })
+    });
+    const d = await r.json();
+
+    if (!r.ok || !d.success) {
+      throw new Error(d.detail || "Identifiants incorrects");
+    }
+
+    saveSession(d.token, d.user);
+    hideLogin();
+    toast("✅ Bienvenue " + (d.user.name || d.user.username));
+    fetchDashboard();
   } catch (e) {
-    console.warn("Local storage unavailable:", e);
+    err.textContent = "❌ " + e.message;
+    err.classList.add("show");
+  } finally {
+    btn.disabled = false;
+    btn.textContent = "SE CONNECTER";
   }
 }
 
-function signedOutView() {
-  return `
-    <div class="card" style="max-width:480px;margin:60px auto;text-align:center;">
-      <div class="ey">SESSION</div>
-      <h1 style="margin:12px 0">Déconnecté</h1>
-      <p class="muted" style="margin:0 0 18px">Vous avez été déconnecté du tableau de bord NOC.</p>
-      <button id="signin" class="signout" style="padding:10px 18px;">SIGN IN</button>
-    </div>
-  `;
+async function doLogout() {
+  try {
+    if (authToken) {
+      await fetch(`${API_URL}/api/logout`, {
+        method: "POST",
+        headers: { "X-Auth-Token": authToken }
+      });
+    }
+  } catch(e) {}
+  clearSession();
+  showLogin();
+  toast("👋 Déconnecté");
+  alerts = [];
+  stats = { health: 0, hosts_total: 0, hosts_available: 0, alerts_total: 0, availability: 0 };
 }
 
 // ============ API FETCH ============
 async function fetchDashboard() {
+  if (!authToken) return;
   try {
-    console.log("🔄 Fetching data mn backend...");
     const r = await fetch(`${API_URL}/api/dashboard`);
     if (!r.ok) throw new Error(`HTTP ${r.status}`);
     const d = await r.json();
     stats = d.stats;
     alerts = d.alerts;
-    console.log("✅ Data fetched:", d);
-    updateConnStatus(true);
     render();
   } catch (e) {
-    console.error("❌ Erreur fetch:", e);
-    updateConnStatus(false);
-    alerts = [
-      { id: 1, sev: "CRITIQUE", src: "BACKEND", txt: "Backend mashi connecté — khddem python main.py", time: "—", state: "OPEN" }
-    ];
+    console.error("Erreur fetch:", e);
+    alerts = [{ id: 1, sev: "CRITIQUE", src: "BACKEND", txt: "Backend mashi connecté", time: "—", state: "OPEN" }];
     stats = { health: 0, hosts_total: 0, hosts_available: 0, alerts_total: 1, availability: 0 };
     render();
-  }
-}
-
-function updateConnStatus(connected) {
-  const el = document.querySelector("#connStatus");
-  if (!el) return;
-  if (connected) {
-    el.className = "conn on";
-    el.textContent = "✅ API";
-  } else {
-    el.className = "conn off";
-    el.textContent = "❌ API Off";
   }
 }
 
@@ -776,13 +1056,6 @@ function ecosystem() {
 const views = { dashboard, alerts: alertsPage, datacenter, security, infra, network, ecosystem };
 
 function render() {
-  if (!signedIn) {
-    app.innerHTML = signedOutView();
-    document.querySelector("#signout")?.setAttribute("style", "display:none");
-    return;
-  }
-
-  document.querySelector("#signout")?.removeAttribute("style");
   app.innerHTML = views[page]();
   nav.forEach(b => b.classList.toggle("active", b.dataset.page === page));
   const el = document.querySelector("#alertCount");
@@ -860,36 +1133,39 @@ document.querySelector("#manager").onclick = () => {
   render();
 };
 
-document.querySelector("#signout").onclick = () => {
-  if (!signedIn) return;
-  const confirmed = window.confirm("Voulez-vous vraiment vous déconnecter du tableau de bord ?");
-  if (!confirmed) return;
-  setSignedOutState(true);
-  toast("✅ Déconnecté");
-  render();
-};
-
-document.addEventListener("click", (event) => {
-  if (event.target && event.target.id === "signin") {
-    setSignedOutState(false);
-    toast("✅ Connecté");
-    render();
-  }
-});
-
 document.querySelector("#theme").onclick = () =>
   document.body.style.filter = document.body.style.filter ? "" : "brightness(1.15)";
+
+document.querySelector("#signOutBtn").onclick = () => {
+  if (confirm("Voulez-vous vraiment vous déconnecter ?")) {
+    doLogout();
+  }
+};
 
 setInterval(() => {
   const c = document.querySelector("#clock");
   if (c) c.textContent = new Date().toLocaleTimeString("fr-FR");
 }, 1000);
 
-// ============ AUTO-REFRESH ============
-setInterval(fetchDashboard, 15000);
+setInterval(() => {
+  if (authToken) fetchDashboard();
+}, 15000);
+
+// ============ LOGIN FORM ============
+document.querySelector("#loginForm").onsubmit = (e) => {
+  e.preventDefault();
+  const u = document.querySelector("#username").value.trim();
+  const p = document.querySelector("#password").value;
+  if (u && p) doLogin(u, p);
+};
 
 // ============ LAUNCH ============
-fetchDashboard();
+if (loadSession()) {
+  hideLogin();
+  fetchDashboard();
+} else {
+  showLogin();
+}
 </script>
 
 </body>

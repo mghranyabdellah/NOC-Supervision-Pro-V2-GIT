@@ -2,12 +2,13 @@
 NOC Backend API — FastAPI
 Kaytjbed données o kay3tihom l frontend
 """
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Header
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from typing import Optional
 import data
 import time
+import secrets
 
 
 # ============ APP ============
@@ -33,7 +34,9 @@ app.add_middleware(
 class AckRequest(BaseModel):
     event_id: int
     message: Optional[str] = "ACK from NOC dashboard"
-
+class LoginRequest(BaseModel):
+    username: str
+    password: str
 
 # ============ ROUTES ============
 
@@ -47,8 +50,42 @@ def root():
         "docs": "/docs"
     }
 
+# ============ LOGIN ============
+active_tokens = {}  # { token: user_info }
 
-@app.get("/api/health")
+
+@app.post("/api/login")
+def api_login(req: LoginRequest):
+    """Login dyal user"""
+    user = data.authenticate(req.username, req.password)
+    if not user:
+        raise HTTPException(status_code=401, detail="Username wla password ghalet")
+
+    token = secrets.token_hex(32)
+    active_tokens[token] = user
+
+    return {
+        "success": True,
+        "token": token,
+        "user": user
+    }
+
+
+@app.post("/api/logout")
+def api_logout(token: str = Header(default="", alias="X-Auth-Token")):
+    """Logout"""
+    if token in active_tokens:
+        del active_tokens[token]
+    return {"success": True}
+
+
+@app.get("/api/me")
+def api_me(token: str = Header(default="", alias="X-Auth-Token")):
+    """Kayrje3 info dyal user li m'connecté"""
+    if token not in active_tokens:
+        raise HTTPException(status_code=401, detail="Mashi connecté")
+    return active_tokens[token]
+@app.get("/api/login /api/health")
 def health():
     """Check ila API khddam"""
     return {

@@ -94,3 +94,58 @@ def simulate_incident():
         "time": datetime.now().strftime("%H:%M"),
         "state": "OPEN"
     }
+
+
+
+# ============ USERS ============
+# F production, khass t'khazzen passwords b hash (bcrypt, argon2)
+# Daba demo: plain text
+USERS = [
+    {
+        "id": 1,
+        "username": "admin",
+        "password": "admin123",
+        "role": "admin",
+        "name": "Administrateur NOC"
+    },
+    {
+        "id": 2,
+        "username": "operator",
+        "password": "operator123",
+        "role": "operator",
+        "name": "Opérateur NOC"
+    },
+    {
+        "id": 3,
+        "username": "viewer",
+        "password": "viewer123",
+        "role": "viewer",
+        "name": "Consultation"
+    }
+]
+
+
+def authenticate(username, password):
+    """Kayverifi credentials"""
+    for u in USERS:
+        if u["username"] == username and u["password"] == password:
+            return {
+                "id": u["id"],
+                "username": u["username"],
+                "role": u["role"],
+                "name": u["name"]
+            }
+    return None
+
+
+def get_user(username):
+    """Kayjbed user b username"""
+    for u in USERS:
+        if u["username"] == username:
+            return {
+                "id": u["id"],
+                "username": u["username"],
+                "role": u["role"],
+                "name": u["name"]
+            }
+    return None
