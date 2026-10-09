@@ -1,0 +1,83 @@
+version: "3.9"
+
+services:
+  # ============ DATABASE ============
+  zabbix-db:
+    image: mariadb:10.11
+    container_name: zabbix-db
+    restart: unless-stopped
+    environment:
+      MYSQL_DATABASE: zabbix
+      MYSQL_USER: zabbix
+      MYSQL_PASSWORD: zabbix_pass
+      MYSQL_ROOT_PASSWORD: root_pass
+    volumes:
+      - zabbix_db_data:/var/lib/mysql
+    networks:
+      - zabbix-net
+
+  # ============ ZABBIX SERVER ============
+  zabbix-server:
+    image: zabbix/zabbix-server-mysql:alpine-6.4-latest
+    container_name: zabbix-server
+    restart: unless-stopped
+    depends_on:
+      - zabbix-db
+    environment:
+      DB_SERVER_HOST: zabbix-db
+      MYSQL_DATABASE: zabbix
+      MYSQL_USER: zabbix
+      MYSQL_PASSWORD: zabbix_pass
+      MYSQL_ROOT_PASSWORD: root_pass
+    ports:
+      - "10051:10051"
+    networks:
+      - zabbix-net
+
+  # ============ ZABBIX WEB ============
+  zabbix-web:
+    image: zabbix/zabbix-web-nginx-mysql:alpine-6.4-latest
+    container_name: zabbix-web
+    restart: unless-stopped
+    depends_on:
+      - zabbix-server
+      - zabbix-db
+    environment:
+      ZBX_SERVER_HOST: zabbix-server
+      ZBX_SERVER_PORT: 10051
+      DB_SERVER_HOST: zabbix-db
+      MYSQL_DATABASE: zabbix
+      MYSQL_USER: zabbix
+      MYSQL_PASSWORD: zabbix_pass
+      MYSQL_ROOT_PASSWORD: root_pass
+      PHP_TZ: Africa/Casablanca
+    ports:
+      - "8080:8080"
+    networks:
+      - zabbix-net
+
+  # ============ ZABBIX AGENT ============
+  zabbix-agent:
+    image: zabbix/zabbix-agent:alpine-6.4-latest
+    container_name: zabbix-agent
+    restart: unless-stopped
+    depends_on:
+      - zabbix-server
+    environment:
+      ZBX_HOSTNAME: zabbix-agent-local
+      ZBX_SERVER_HOST: zabbix-server
+      ZBX_SERVER_PORT: 10051
+    ports:
+      - "10050:10050"
+    networks:
+      - zabbix-net
+
+# ============ VOLUMES ============
+volumes:
+  zabbix_db_data:
+    driver: local
+
+# ============ NETWORKS ============
+networks:
+  zabbix-net:
+    driver: bridge

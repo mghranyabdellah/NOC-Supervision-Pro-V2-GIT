@@ -1,91 +1,54 @@
 """
-Données demo dyal NOC
-Mn ba3d ila jbti Zabbix, hadchi ghadi ytbedel b données réelles
+Données NOC — mn Zabbix API
 """
-import time
-from datetime import datetime
+import os
+from zabbix_client import ZabbixClient
+
+# ============ ZABBIX CONFIG ============
+ZABBIX_URL = os.getenv("ZABBIX_URL", "http://localhost:8080/api_jsonrpc.php")
+ZABBIX_USER = os.getenv("ZABBIX_USER", "Admin")
+ZABBIX_PASSWORD = os.getenv("ZABBIX_PASSWORD", "zabbix")
+
+# ============ CLIENT ============
+zabbix = ZabbixClient(ZABBIX_URL, ZABBIX_USER, ZABBIX_PASSWORD)
 
 
 # ============ ALERTES ============
 def get_alerts():
-    """Kayrje3 liste dyal les alertes"""
-    now = datetime.now()
-    return [
-        {
-            "id": 1,
-            "sev": "CRITIQUE",
-            "src": "WAN-CORE-01",
-            "txt": "Perte de connectivité WAN",
-            "time": now.strftime("%H:%M"),
-            "state": "OPEN"
-        },
-        {
-            "id": 2,
-            "sev": "MAJEUR",
-            "src": "FW-EDGE-02",
-            "txt": "CPU firewall supérieur au seuil",
-            "time": "15:39",
-            "state": "OPEN"
-        },
-        {
-            "id": 3,
-            "sev": "AVERT.",
-            "src": "SRV-APP-15",
-            "txt": "Espace disque faible",
-            "time": "15:35",
-            "state": "OPEN"
-        },
-        {
-            "id": 4,
-            "sev": "INFO",
-            "src": "BACKUP-03",
-            "txt": "Sauvegarde terminée",
-            "time": "15:30",
-            "state": "ACK"
-        }
-    ]
+    """Jbed alertes mn Zabbix"""
+    alerts = zabbix.get_alerts()
+    if not alerts:
+        return [
+            {"id": 1, "sev": "INFO", "sevClass": "info", "src": "SYSTEM", "txt": "Aucune alerte active", "time": "--:--", "state": "ACK"}
+        ]
+    return alerts
 
 
 # ============ STATS ============
 def get_stats():
-    """Stats globales"""
-    return {
-        "hosts_total": 128,
-        "hosts_available": 126,
-        "hosts_down": 2,
-        "health": 98.7,
-        "alerts_critical": 1,
-        "alerts_warning": 2,
-        "alerts_total": 4,
-        "availability": 99.96
-    }
+    """Stats mn Zabbix"""
+    stats = zabbix.get_stats()
+    if not stats:
+        return {"hosts_total": 0, "hosts_available": 0, "hosts_down": 0, "health": 0, "alerts_critical": 0, "alerts_warning": 0, "alerts_total": 0, "availability": 0}
+    return stats
 
 
 # ============ HOSTS ============
 def get_hosts():
-    """Liste dyal les serveurs"""
-    return [
-        {
-            "id": str(i),
-            "name": f"SRV-{i:03d}",
-            "ip": f"10.0.0.{i}",
-            "status": "OK" if i != 15 else "DOWN",
-            "enabled": True
-        }
-        for i in range(1, 21)
-    ]
+    """Hôtes mn Zabbix"""
+    return zabbix.get_hosts()
 
 
 # ============ ACK INCIDENT ============
 def acknowledge_incident(event_id):
-    """Kaydir ACK l incident (f demo, ghir kayrje3 success)"""
-    print(f"✅ ACK incident #{event_id}")
-    return {"success": True, "message": f"Incident #{event_id} acquitté"}
+    """ACK mn Zabbix"""
+    return zabbix.acknowledge(event_id)
 
 
 # ============ SIMULATE INCIDENT ============
 def simulate_incident():
-    """Kaysawb incident jdid"""
+    """Demo"""
+    from datetime import datetime
     return {
         "id": 999,
         "sev": "CRITIQUE",
@@ -96,32 +59,11 @@ def simulate_incident():
     }
 
 
-
 # ============ USERS ============
-# F production, khass t'khazzen passwords b hash (bcrypt, argon2)
-# Daba demo: plain text
 USERS = [
-    {
-        "id": 1,
-        "username": "admin",
-        "password": "admin123",
-        "role": "admin",
-        "name": "Administrateur NOC"
-    },
-    {
-        "id": 2,
-        "username": "operator",
-        "password": "operator123",
-        "role": "operator",
-        "name": "Opérateur NOC"
-    },
-    {
-        "id": 3,
-        "username": "viewer",
-        "password": "viewer123",
-        "role": "viewer",
-        "name": "Consultation"
-    }
+    {"id": 1, "username": "admin", "password": "admin123", "role": "admin", "name": "Administrateur NOC"},
+    {"id": 2, "username": "operator", "password": "operator123", "role": "operator", "name": "Opérateur NOC"},
+    {"id": 3, "username": "viewer", "password": "viewer123", "role": "viewer", "name": "Consultation"}
 ]
 
 
@@ -129,12 +71,7 @@ def authenticate(username, password):
     """Kayverifi credentials"""
     for u in USERS:
         if u["username"] == username and u["password"] == password:
-            return {
-                "id": u["id"],
-                "username": u["username"],
-                "role": u["role"],
-                "name": u["name"]
-            }
+            return {"id": u["id"], "username": u["username"], "role": u["role"], "name": u["name"]}
     return None
 
 
@@ -142,10 +79,5 @@ def get_user(username):
     """Kayjbed user b username"""
     for u in USERS:
         if u["username"] == username:
-            return {
-                "id": u["id"],
-                "username": u["username"],
-                "role": u["role"],
-                "name": u["name"]
-            }
+            return {"id": u["id"], "username": u["username"], "role": u["role"], "name": u["name"]}
     return None
